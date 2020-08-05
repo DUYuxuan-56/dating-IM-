@@ -8,12 +8,13 @@ const resolvers: Resolvers = {
 
   Chat: {
     messages(chat) {
-      return messages.find((m) => chat.messages.includes(m.id));
+      return messages.filter((m) => chat.messages.includes(m.id));
     },
-    lastMessage(chat) {
 
+    lastMessage(chat) {
       const lastMessage = chat.messages[chat.messages.length - 1];
-      return messages.find((m) => m.id === lastMessage)|| null;
+
+      return messages.find((m) => m.id === lastMessage) || null;
     },
   },
 
@@ -21,6 +22,7 @@ const resolvers: Resolvers = {
     chats() {
       return chats;
     },
+
     chat(root, { chatId }) {
       return chats.find((c) => c.id === chatId) || null;
     },
@@ -43,6 +45,7 @@ const resolvers: Resolvers = {
         createdAt: new Date(),
         content,
       };
+
       messages.push(message);
       chat.messages.push(messageId);
       // The chat will appear at the top of the ChatsList component
@@ -53,4 +56,5 @@ const resolvers: Resolvers = {
     },
   },
 };
+
 export default resolvers;
