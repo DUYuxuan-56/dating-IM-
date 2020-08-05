@@ -6,8 +6,13 @@ const resolvers = {
   URL: URLResolver,
 
   Chat: {
+    messages(chat: any) {
+      return messages.find((m) => chat.messages.includes(m.id));
+    },
     lastMessage(chat: any) {
-      return messages.find((m) => m.id === chat.lastMessage);
+
+      const lastMessage = chat.messages[chat.messages.length - 1];
+      return messages.find((m) => m.id === lastMessage);
     },
   },
 
@@ -15,6 +20,9 @@ const resolvers = {
     chats() {
       return chats;
     },
+    chat(root: any, { chatId }: any) {
+      return chats.find(c => c.id === chatId);
+    }
   },
 };
 
