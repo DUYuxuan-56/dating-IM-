@@ -5,10 +5,10 @@ import { pool, resetDb } from '../../db';
 import sql from 'sql-template-strings';
 import { MyContext } from '../../context';
 
-describe('Query.chats', () => {
+describe('Query.chat', () => {
   beforeEach(resetDb);
 
-  it('should fetch all chats', async () => {
+  it('should fetch specified chat', async () => {
     const { rows } = await pool.query(sql`SELECT * FROM users WHERE id = 1`);
     const currentUser = rows[0];
     const server = new ApolloServer({
@@ -26,9 +26,10 @@ describe('Query.chats', () => {
     const { query } = createTestClient(server);
 
     const res = await query({
+      variables: { chatId: '1' },
       query: gql`
-        query GetChats {
-          chats {
+        query GetChat($chatId: ID!) {
+          chat(chatId: $chatId) {
             id
             name
             picture
