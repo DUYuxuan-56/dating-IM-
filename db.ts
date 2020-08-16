@@ -1,6 +1,6 @@
 import { Pool } from 'pg';
 import sql from 'sql-template-strings';
-import { resetDb as envResetDb } from './env';
+import { resetDb as envResetDb,hostIP } from './env';
 
 export type User = {
   id: string;
@@ -23,7 +23,7 @@ export type Chat = {
 };
 
 export const dbConfig = {
-  host: '192.168.99.100',
+  host: hostIP,
   port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 5432,
   user: 'testuser',
   password: 'testpassword',
