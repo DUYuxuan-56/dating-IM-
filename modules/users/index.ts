@@ -15,6 +15,7 @@ const typeDefs = gql`
   extend type Query {
     me: User
     users: [User!]!
+    randomUsers: [User!]!
   }
   extend type Mutation {
     signIn(username: String!, password: String!): User
@@ -32,12 +33,21 @@ const resolvers: Resolvers = {
     me(root, args, { injector }) {
       return injector.get(Auth).currentUser();
     },
+
     async users(root, args, { injector }) {
       const currentUser = await injector.get(Auth).currentUser();
 
       if (!currentUser) return [];
 
       return injector.get(Users).findAllExcept(currentUser.id);
+    },
+
+    async randomUsers(root, args, { injector }) {
+      const currentUser = await injector.get(Auth).currentUser();
+
+      if (!currentUser) return [];
+
+      return injector.get(Users).findRandom(currentUser.id);
     },
   },
   Mutation: {

@@ -38,6 +38,16 @@ export class Users {
     return rows[0] || null;
   }
 
+  async findRandom(userId: string) {
+    const db = await this.db.getClient();
+    const numOfUser=Math.floor(Math.random() * 3) + 1;//1~3
+    const { rows } = await db.query(
+      sql`SELECT * FROM users WHERE random() < 0.5 AND id != ${userId} limit ${numOfUser} ;`
+    );
+
+    return rows;
+  }
+
   async newUser({
     username,
     name,
