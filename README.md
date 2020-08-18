@@ -1,4 +1,4 @@
-# Whatsapp Clone Server
+# Instant Messaging APP Server
 
 [//]: # (head-end)
 
@@ -34,7 +34,7 @@ Install PostgreSQL and initialize a database
 * With docker - PosgreSQL
 ```
 docker-compose up -d
-
+```
 Run tests to make sure everything is ok:
 ```
 $ yarn test
