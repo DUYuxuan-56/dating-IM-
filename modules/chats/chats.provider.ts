@@ -1,5 +1,6 @@
 import { Injectable, Inject, ProviderScope } from '@graphql-modules/di';
 import sql from 'sql-template-strings';
+import format from 'date-fns/format';
 import { Database } from '../common/database.provider';
 import { PubSub } from '../common/pubsub.provider';
 
@@ -42,13 +43,55 @@ export class Chats {
     return rows[0] || null;
   }
 
-  async findMessagesByChat(chatId: string) {
-    const db = await this.db.getClient();
-    const { rows } = await db.query(
-      sql`SELECT * FROM messages WHERE chat_id = ${chatId}`
+  async findMessagesByChat({
+    chatId,
+    limit,
+    after,
+  }: {
+    chatId: string;
+    limit: number;
+    after?: number | null;
+  }): Promise<{
+    hasMore: boolean;
+    cursor: number | null;
+    messages: any[];
+  }> {
+    const query = sql`SELECT * FROM messages`;
+    query.append(` WHERE chat_id = ${chatId}`);
+
+    if (after) {
+      // the created_at is the cursor
+      query.append(` AND created_at < ${cursorToDate(after)}`);
+    }
+
+    query.append(` ORDER BY created_at DESC LIMIT ${limit}`);
+
+    const { rows: messages } = await this.db.query(query);
+
+    if (!messages) {
+      return {
+        hasMore: false,
+        cursor: null,
+        messages: [],
+      };
+    }
+
+    // so we send them as old -> new
+    messages.reverse();
+
+    // cursor is a number representation of created_at
+    const cursor = messages.length ? new Date(messages[0].created_at).getTime() : 0;
+    const { rows: next } = await this.db.query(
+      sql`SELECT * FROM messages WHERE chat_id = ${chatId} AND created_at < ${cursorToDate(
+        cursor
+      )} ORDER BY created_at DESC LIMIT 1`
     );
 
-    return rows;
+    return {
+      hasMore: next.length === 1, // means there's no more messages
+      cursor,
+      messages,
+    };
   }
 
   async lastMessage(chatId: string) {
@@ -213,4 +256,7 @@ export class Chats {
       throw e;
     }
   }
+}
+function cursorToDate(cursor: number) {
+  return `'${format(cursor, 'yyyy-MM-dd HH:mm:ss')}'`;
 }

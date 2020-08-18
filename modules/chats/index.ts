@@ -20,12 +20,19 @@ const typeDefs = gql`
     recipient: User
     isMine: Boolean!
   }
+  
+  type MessagesResult {
+    cursor: Float
+    hasMore: Boolean!
+    messages: [Message!]!
+  }
+
   type Chat {
     id: ID!
     name: String
     picture: URL
     lastMessage: Message
-    messages: [Message!]!
+    messages(limit: Int!, after: Float): MessagesResult!
     participants: [User!]!
   }
   extend type Query {
@@ -101,7 +108,11 @@ const resolvers: Resolvers = {
     },
 
     async messages(chat, args, { injector }) {
-      return injector.get(Chats).findMessagesByChat(chat.id);
+      return injector.get(Chats).findMessagesByChat({
+        chatId: chat.id,
+        limit: args.limit,
+        after: args.after,
+      });
     },
 
     async lastMessage(chat, args, { injector }) {
